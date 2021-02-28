@@ -13,23 +13,25 @@ class Parser:
         except StopIteration:
             self.curr_token = None
 
-    def NewLetter(self):
-        letter = self.curr_token
+    def NewFactor(self):
+        token = self.curr_token
 
-        if letter.type == TokenType.LPAR:
+        if token.type == TokenType.LPAR:
             self.Next()
             res = self.Expression()
-            if self.curr_token == None or self.curr_token.type != TokenType.RPAR:
+
+            if self.curr_token.type != TokenType.RPAR:
                 raise Exception('No right parenthesis for expression!')
+
             self.Next()
             return res
 
-        if letter.type == TokenType.LETTER:
+        elif token.type == TokenType.LETTER:
             self.Next()
-            return Letter(letter.value)
+            return Letter(token.value)
 
     def NewKleene(self):
-        res = self.NewLetter()
+        res = self.NewFactor()
 
         while self.curr_token != None and (self.curr_token.type == TokenType.KLEENE):
             self.Next()
@@ -40,13 +42,10 @@ class Parser:
     def Expression(self):
         res = self.NewKleene()
 
-        while self.curr_token != None and (self.curr_token.type == TokenType.OR or self.curr_token.type == TokenType.LETTER):
+        while self.curr_token != None and (self.curr_token.type == TokenType.OR or self.curr_token.type == TokenType.PLUS):
             if self.curr_token.type == TokenType.OR:
                 self.Next()
                 res = Or(res, self.NewKleene())
-            elif self.curr_token.type == TokenType.LETTER:
-                self.Next()
-                res = Letter(self.NewKleene())
 
         return res
 
@@ -55,5 +54,7 @@ class Parser:
             return None
 
         res = self.Expression()
+        while self.curr_token != None:
+            res = Expression(res, self.Expression())
 
         return res
