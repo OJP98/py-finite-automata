@@ -21,12 +21,15 @@ class Reader:
             elif self.curr_char == '|':
                 self.Next()
                 yield Token(TokenType.OR, '|')
+            elif self.curr_char == '':
+                self.Next()
+                yield Token(TokenType.APPEND, '')
             elif self.curr_char == '(':
                 self.Next()
-                yield Token(TokenType.LPAR, '(')
+                yield Token(TokenType.LPAR)
             elif self.curr_char == ')':
                 self.Next()
-                yield Token(TokenType.RPAR, ')')
+                yield Token(TokenType.RPAR)
             elif self.curr_char == '*':
                 self.Next()
                 yield Token(TokenType.KLEENE, '*')

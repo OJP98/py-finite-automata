@@ -14,6 +14,7 @@ while True:
     # res = interpreter.Calc(tree)
 
     print(f'''
+            tokens: {list(Reader(string).CreateTokens())}
             parsed: {tree}
             ''')
 
