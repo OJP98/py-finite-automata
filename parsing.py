@@ -13,7 +13,7 @@ class Parser:
         except StopIteration:
             self.curr_token = None
 
-    def NewFactor(self):
+    def NewSymbol(self):
         token = self.curr_token
 
         if token.type == TokenType.LPAR:
@@ -30,22 +30,26 @@ class Parser:
             self.Next()
             return Letter(token.value)
 
-    def NewKleene(self):
-        res = self.NewFactor()
+    def NewOperator(self):
+        res = self.NewSymbol()
 
-        while self.curr_token != None and (self.curr_token.type == TokenType.KLEENE):
-            self.Next()
-            res = Kleene(res)
+        while self.curr_token != None and (self.curr_token.type == TokenType.KLEENE or self.curr_token.type == TokenType.PLUS):
+            if self.curr_token.type == TokenType.KLEENE:
+                self.Next()
+                res = Kleene(res)
+            else:
+                self.Next()
+                res = Plus(res)
 
         return res
 
     def Expression(self):
-        res = self.NewKleene()
+        res = self.NewOperator()
 
-        while self.curr_token != None and (self.curr_token.type == TokenType.OR or self.curr_token.type == TokenType.PLUS):
+        while self.curr_token != None and self.curr_token.type == TokenType.OR:
             if self.curr_token.type == TokenType.OR:
                 self.Next()
-                res = Or(res, self.NewKleene())
+                res = Or(res, self.NewOperator())
 
         return res
 

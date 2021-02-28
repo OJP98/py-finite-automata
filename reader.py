@@ -33,6 +33,11 @@ class Reader:
             elif self.curr_char == '*':
                 self.Next()
                 yield Token(TokenType.KLEENE, '*')
+            elif self.curr_char == '+':
+                self.Next()
+                yield Token(TokenType.PLUS, '+')
+            else:
+                raise Exception(f'Invalid entry: {self.curr_char}')
 
     def CreateLetter(self):
         exp = self.curr_char

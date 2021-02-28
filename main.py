@@ -15,7 +15,7 @@ while True:
 
     print(f'''
             tokens: {list(Reader(string).CreateTokens())}
-            parsed: {tree}
+            parsed tree: {tree}
             ''')
 
 exit(1)
