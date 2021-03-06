@@ -33,10 +33,18 @@ class Parser:
     def NewOperator(self):
         res = self.NewSymbol()
 
-        while self.curr_token != None and (self.curr_token.type == TokenType.KLEENE or self.curr_token.type == TokenType.PLUS):
+        while self.curr_token != None and \
+                (
+                    self.curr_token.type == TokenType.KLEENE or
+                    self.curr_token.type == TokenType.PLUS or
+                    self.curr_token.type == TokenType.QUESTION
+                ):
             if self.curr_token.type == TokenType.KLEENE:
                 self.Next()
                 res = Kleene(res)
+            elif self.curr_token.type == TokenType.QUESTION:
+                self.Next()
+                res = Question(res)
             else:
                 self.Next()
                 res = Plus(res)
@@ -46,8 +54,16 @@ class Parser:
     def Expression(self):
         res = self.NewOperator()
 
-        while self.curr_token != None and self.curr_token.type == TokenType.OR:
-            if self.curr_token.type == TokenType.OR:
+        while self.curr_token != None and \
+                (
+                    self.curr_token.type == TokenType.APPEND or
+                    self.curr_token.type == TokenType.OR
+                ):
+            if self.curr_token.type == TokenType.APPEND:
+                self.Next()
+                res = Append(res, self.NewOperator())
+
+            elif self.curr_token.type == TokenType.OR:
                 self.Next()
                 res = Or(res, self.NewOperator())
 
@@ -58,7 +74,5 @@ class Parser:
             return None
 
         res = self.Expression()
-        while self.curr_token != None:
-            res = Expression(res, self.Expression())
 
         return res

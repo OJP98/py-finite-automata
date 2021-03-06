@@ -18,24 +18,41 @@ class Reader:
         while self.curr_char != None:
             if self.curr_char in LETTERS:
                 yield self.CreateLetter()
+
+                if self.curr_char != None and self.curr_char == '(':
+                    yield Token(TokenType.APPEND)
+
             elif self.curr_char == '|':
                 self.Next()
                 yield Token(TokenType.OR, '|')
-            elif self.curr_char == '':
-                self.Next()
-                yield Token(TokenType.APPEND, '')
+
             elif self.curr_char == '(':
                 self.Next()
                 yield Token(TokenType.LPAR)
-            elif self.curr_char == ')':
-                self.Next()
-                yield Token(TokenType.RPAR)
-            elif self.curr_char == '*':
-                self.Next()
-                yield Token(TokenType.KLEENE, '*')
-            elif self.curr_char == '+':
-                self.Next()
-                yield Token(TokenType.PLUS, '+')
+
+            elif self.curr_char in (')*+?'):
+
+                if self.curr_char == ')':
+                    self.Next()
+                    yield Token(TokenType.RPAR)
+
+                elif self.curr_char == '*':
+                    self.Next()
+                    yield Token(TokenType.KLEENE)
+
+                elif self.curr_char == '+':
+                    self.Next()
+                    yield Token(TokenType.PLUS)
+
+                elif self.curr_char == '?':
+                    self.Next()
+                    yield Token(TokenType.QUESTION)
+
+                # Finally, check if we need to add an append token
+                if self.curr_char != None and \
+                        (self.curr_char in LETTERS or self.curr_char == '('):
+                    yield Token(TokenType.APPEND, '.')
+
             else:
                 raise Exception(f'Invalid entry: {self.curr_char}')
 

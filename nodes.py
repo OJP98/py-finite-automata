@@ -12,7 +12,7 @@ class Append():
         self.b = b
 
     def __repr__(self):
-        return f'({self.a}{self.b})'
+        return f'({self.a}.{self.b})'
 
 
 class Or():
@@ -29,7 +29,7 @@ class Kleene():
         self.a = a
 
     def __repr__(self):
-        return f'({self.a}*)'
+        return f'{self.a}*'
 
 
 class Plus():
@@ -37,7 +37,15 @@ class Plus():
         self.a = a
 
     def __repr__(self):
-        return f'({self.a}+)'
+        return f'{self.a}+'
+
+
+class Question():
+    def __init__(self, a):
+        self.a = a
+
+    def __repr__(self):
+        return f'{self.a}?'
 
 
 class Expression():
@@ -47,5 +55,5 @@ class Expression():
 
     def __repr__(self):
         if self.b != None:
-            return f'({self.a}{self.b})'
-        return f'({self.a})'
+            return f'{self.a}{self.b}'
+        return f'{self.a}'

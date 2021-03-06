@@ -7,8 +7,9 @@ class TokenType(Enum):
     OR = 2
     KLEENE = 3
     PLUS = 4
-    LPAR = 5
-    RPAR = 5
+    QUESTION = 5
+    LPAR = 6
+    RPAR = 6
 
 
 class Token:
