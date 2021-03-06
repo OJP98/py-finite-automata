@@ -17,9 +17,11 @@ class Reader:
     def CreateTokens(self):
         while self.curr_char != None:
             if self.curr_char in LETTERS:
-                yield self.CreateLetter()
+                yield Token(TokenType.LETTER, self.curr_char)
+                self.Next()
 
-                if self.curr_char != None and self.curr_char == '(':
+                if self.curr_char != None and \
+                        (self.curr_char == '(' or self.curr_char in LETTERS):
                     yield Token(TokenType.APPEND)
 
             elif self.curr_char == '|':
