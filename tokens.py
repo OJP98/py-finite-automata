@@ -9,7 +9,7 @@ class TokenType(Enum):
     PLUS = 4
     QUESTION = 5
     LPAR = 6
-    RPAR = 6
+    RPAR = 7
 
 
 class Token:

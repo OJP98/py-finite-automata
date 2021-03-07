@@ -1,8 +1,0 @@
-// Diagrama NFA
-digraph {
-	s0
-	s1
-	s2 [shape=doublecircle]
-	s0 -> s1 [label=a]
-	s1 -> s2 [label=b]
-}

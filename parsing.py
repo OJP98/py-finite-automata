@@ -59,13 +59,13 @@ class Parser:
                     self.curr_token.type == TokenType.APPEND or
                     self.curr_token.type == TokenType.OR
                 ):
-            if self.curr_token.type == TokenType.APPEND:
-                self.Next()
-                res = Append(res, self.NewOperator())
-
-            elif self.curr_token.type == TokenType.OR:
+            if self.curr_token.type == TokenType.OR:
                 self.Next()
                 res = Or(res, self.NewOperator())
+
+            elif self.curr_token.type == TokenType.APPEND:
+                self.Next()
+                res = Append(res, self.NewOperator())
 
         return res
 
@@ -76,3 +76,28 @@ class Parser:
         res = self.Expression()
 
         return res
+
+
+class NFADiagram:
+    def __init__(self, tokens):
+        self.tokens = iter(tokens)
+        self.last_symbol = None
+        self.Next()
+
+    def Next(self):
+        try:
+            self.curr_token = next(self.tokens)
+        except StopIteration:
+            self.curr_token = None
+
+    def Diagram(self):
+        if self.curr_token == None:
+            return None
+
+        while self.curr_token != None:
+            self.Next()
+            self.Iterate()
+
+    def Iterate(self):
+        if self.curr_token.type == TokenType.LETTER:
+            self.last_symbol = self.curr_token

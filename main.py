@@ -1,39 +1,39 @@
 from reader import Reader
 from parsing import Parser
-from nfa import NFA
+from nfa import NFADiagram, NFA
 
+# if __name__ == "__main__":
 
-def main():
-    string = 'a|b'
-    reader = Reader(string)
-    tokens = reader.CreateTokens()
-    parser = Parser(tokens)
-    tree = parser.Parse()
-    _nfa = NFA(tree)
+#     while True:
+#         string = input('Type an expression to evaluate: ')
+#         if string == 'exit':
+#             break
 
-    print(f'''
-            tokens: {list(Reader(string).CreateTokens())}
-            parsed tree: {tree}
-            ''')
+#         reader = Reader(string)
+#         tokens = reader.CreateTokens()
+#         parser = Parser(tokens)
+#         tree = parser.Parse()
+#         _nfa = NFA(tree, reader.GetSymbols())
 
-# while True:
-#     string = input('Type an expression to evaluate: ')
-#     if string == 'exit':
-#         break
+#         print(f'''
+#                 tokens: {list(Reader(string).CreateTokens())}
+#                 parsed tree: {tree}
+#                 symbols: {reader.GetSymbols()}
+#                 ''')
 
-#     reader = Reader(string)
-#     tokens = reader.CreateTokens()
-#     parser = Parser(tokens)
-#     tree = parser.Parse()
-#     # interpreter = Interpreter()
+#         exit(1)
 
-#     print(f'''
-#             tokens: {list(Reader(string).CreateTokens())}
-#             parsed tree: {tree}
-#             ''')
-
-# exit(1)
-
-
-if __name__ == "__main__":
-    main()
+string = 'a'
+reader = Reader(string)
+tokens = reader.CreateTokens()
+# list(tokens)
+parser = Parser(tokens)
+tree = parser.Parse()
+_nfa = NFA(tree, reader.GetSymbols())
+_nfa.Calc(tree)
+_nfa.WriteNFADiagram()
+print(f'''
+        tokens: {list(Reader(string).CreateTokens())}
+        parsed tree: {tree}
+        symbols: {reader.GetSymbols()}
+        ''')

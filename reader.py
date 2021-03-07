@@ -1,11 +1,12 @@
 from tokens import Token, TokenType
 
-LETTERS = 'abcdefghijklmnopqrstuvwxyz'
+LETTERS = 'abcdefghijklmnopqrstuvwxyz01234567890'
 
 
 class Reader:
     def __init__(self, string: str):
         self.string = iter(string.replace(' ', ''))
+        self.input = set()
         self.Next()
 
     def Next(self):
@@ -17,12 +18,24 @@ class Reader:
     def CreateTokens(self):
         while self.curr_char != None:
             if self.curr_char in LETTERS:
+                self.input.add(self.curr_char)
+                yield Token(TokenType.LPAR, '(')
                 yield Token(TokenType.LETTER, self.curr_char)
+
                 self.Next()
 
-                if self.curr_char != None and \
-                        (self.curr_char == '(' or self.curr_char in LETTERS):
+                while self.curr_char != None and self.curr_char in LETTERS:
+                    self.input.add(self.curr_char)
                     yield Token(TokenType.APPEND)
+                    yield Token(TokenType.LETTER, self.curr_char)
+                    self.Next()
+
+                if self.curr_char != None and self.curr_char == '(':
+                    yield Token(TokenType.RPAR)
+                    yield Token(TokenType.APPEND)
+
+                else:
+                    yield Token(TokenType.RPAR, ')')
 
             elif self.curr_char == '|':
                 self.Next()
@@ -66,4 +79,7 @@ class Reader:
             exp += self.curr_char
             self.Next()
 
-        return Token(TokenType.LETTER, exp)
+        return exp
+
+    def GetSymbols(self):
+        return self.input
