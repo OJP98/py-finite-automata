@@ -1,6 +1,6 @@
 from reader import Reader
 from parsing import Parser
-from nfa import NFADiagram, NFA
+from nfa import NFA
 
 # if __name__ == "__main__":
 
@@ -23,14 +23,15 @@ from nfa import NFADiagram, NFA
 
 #         exit(1)
 
-string = 'a'
+string = '(xyz)*|(bcd)*'
 reader = Reader(string)
 tokens = reader.CreateTokens()
-# list(tokens)
 parser = Parser(tokens)
 tree = parser.Parse()
+
+# NFA
 _nfa = NFA(tree, reader.GetSymbols())
-_nfa.Calc(tree)
+_nfa.Render(tree)
 _nfa.WriteNFADiagram()
 print(f'''
         tokens: {list(Reader(string).CreateTokens())}
