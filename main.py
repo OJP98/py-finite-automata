@@ -23,7 +23,7 @@ from nfa import NFA
 
 #         exit(1)
 
-string = '(xyz)*|(bcd)*'
+string = 'ab?|cd+'
 reader = Reader(string)
 tokens = reader.CreateTokens()
 parser = Parser(tokens)
@@ -32,6 +32,7 @@ tree = parser.Parse()
 # NFA
 _nfa = NFA(tree, reader.GetSymbols())
 _nfa.Render(tree)
+_nfa.GetFinalStates()
 _nfa.WriteNFADiagram()
 print(f'''
         tokens: {list(Reader(string).CreateTokens())}

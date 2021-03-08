@@ -134,7 +134,76 @@ class NFA:
             'e'
         )
 
+    def PlusNode(self, node):
+        self.KleeneNode(node)
+        self.curr_state += 1
+
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            self.Render(node.a)
+        )
+
+    def QuestionNode(self, node):
+        initial_node = self.curr_state - 1
+        mid_node = None
+
+        # from initial to first epsilon
+        self.dot.edge(
+            str(initial_node),
+            str(self.curr_state),
+            'e'
+        )
+        self.curr_state += 1
+
+        # from epsilon to first
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            self.Render(node.a)
+        )
+
+        mid_node = self.curr_state
+        self.curr_state += 1
+
+        # from initial to second epsilone
+        self.dot.edge(
+            str(initial_node),
+            str(self.curr_state),
+            'e'
+        )
+
+        self.curr_state += 1
+
+        # from epsilon to second
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            'e'
+        )
+
+        self.curr_state += 1
+
+        # from first to last epsilon
+        self.dot.edge(
+            str(mid_node),
+            str(self.curr_state),
+            'e'
+        )
+
+        # from second to last epsilon
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            'e'
+        )
+
     def WriteNFADiagram(self):
         source = self.dot.source
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
+
+    def GetFinalStates(self):
+        self.dot.node(str(self.curr_state), shape='doublecircle')
+        self.final_states.append(self.curr_state)
+        return self.final_states
