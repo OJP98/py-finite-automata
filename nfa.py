@@ -227,7 +227,6 @@ class NFA:
 
     def WriteNFADiagram(self):
         source = self.dot.source
-
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
 

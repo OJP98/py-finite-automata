@@ -25,15 +25,24 @@ from dfa import DFA
 #         exit(1)
 
 # string = input('Regular expression: ')
-string = 'a*|b'
+string = '(01)*(10)*'
+print(string)
 reader = Reader(string)
 tokens = reader.CreateTokens()
+print(list(Reader(string).CreateTokens()))
 parser = Parser(tokens)
 tree = parser.Parse()
+
+print(f'''
+        tokens: {list(Reader(string).CreateTokens())}
+        parsed tree: {tree}
+        symbols: {reader.GetSymbols()}
+        ''')
 
 # NFA
 _nfa = NFA(tree, reader.GetSymbols())
 _nfa.Render(tree)
+_nfa.GetFinalStates()
 _nfa.WriteNFADiagram()
 
 trans_table = _nfa.GetTransitionTable()
@@ -43,10 +52,3 @@ symbols = _nfa.symbols
 # DFA
 _dfa = DFA(trans_table, symbols, total_states)
 _dfa.TransformNFAToDFA()
-
-
-print(f'''
-        tokens: {list(Reader(string).CreateTokens())}
-        parsed tree: {tree}
-        symbols: {reader.GetSymbols()}
-        ''')
