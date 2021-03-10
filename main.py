@@ -25,7 +25,7 @@ from dfa import DFA
 #         exit(1)
 
 # string = input('Regular expression: ')
-string = '(01)*(10)*'
+string = 'a*|b'
 print(string)
 reader = Reader(string)
 tokens = reader.CreateTokens()

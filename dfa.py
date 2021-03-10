@@ -4,25 +4,80 @@ STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 class DFA:
-    def __init__(self, trans_func, symbols, states):
-        self.trans_func = trans_func
+    def __init__(self, trans_table, symbols, states):
+        self.trans_table = trans_table
         self.symbols = symbols
         self.states = states
+        self.function = dict()
+        self.states = dict()
+        self.nodes = []
 
-    def Move(self, init_state, transitions, eval_symbol):
-        _set = self.trans_func[init_state]
+    def MoveTo(self, node_id, eval_symbol='e', array=[]):
 
-        for symbol, next_states in transitions.items():
-            for state in next_states:
-                # if there's an epsilon in the next iterated state
-                if eval_symbol in self.trans_func[state]:
-                    new = self.trans_func[state][eval_symbol]
-                    _set[symbol] += new
+        arr = array
+        node = self.nodes[node_id]
+        if not node.visited and eval_symbol in node.next_states:
+            node.Mark()
+            next_states = [int(s) for s in node.next_states[eval_symbol]]
+            arr = [*next_states, node_id] if eval_symbol == 'e' else [*next_states]
+            # arr = [*next_states, node_id]
 
-        return list(set(_set[eval_symbol]))
+            for new_node_id in node.next_states[eval_symbol]:
+                arr += [*self.MoveTo(int(new_node_id), eval_symbol, arr)]
+
+        return list(set(arr))
 
     def TransformNFAToDFA(self):
-        pprint(self.trans_func)
-        eclosure = self.Move('2', self.trans_func['2'], 'a')
-        print(eclosure)
-        # for s in range(self.states):
+
+        for state, values in self.trans_table.items():
+            self.nodes.append(Node(int(state), values))
+
+        current_state = 0
+        state = 0
+        new_state = STATES[0]
+        eclosure = self.MoveTo(0)
+        [node.UnMark() for node in self.nodes]
+
+        self.states[new_state] = eclosure
+        pprint(self.states)
+
+        for value in eclosure:
+            for symbol in self.symbols:
+
+                new_state = STATES[state]
+                print(f'moviendo {value} con simbolo {symbol}')
+
+                move_res = self.MoveTo(value, symbol)
+                [node.UnMark() for node in self.nodes]
+
+                closure = []
+                print(move_res)
+                for trans in move_res:
+                    closure = self.MoveTo(trans)
+                    [node.UnMark() for node in self.nodes]
+
+                final_res = list(set([*move_res, *closure]))
+                print(f'resultado: {final_res}')
+
+                if final_res and final_res not in self.states.values():
+                    state += 1
+                    new_state = STATES[state]
+                    self.states[new_state] = final_res
+
+        pprint(self.states)
+
+
+class Node:
+    def __init__(self, num, next_states):
+        self.num = num
+        self.visited = False
+        self.next_states = next_states
+
+    def Mark(self):
+        self.visited = True
+
+    def UnMark(self):
+        self.visited = False
+
+    def __repr__(self):
+        return f'{self.num} - {self.visited}: {self.next_states}'
