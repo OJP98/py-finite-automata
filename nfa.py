@@ -1,4 +1,5 @@
 from graphviz import Digraph
+from pprint import pprint
 from nodes import Or
 from tokens import TokenType
 from utils import WriteToFile
@@ -12,6 +13,7 @@ class NFA:
         self.init_node = init_node
         self.final_states = []
         self.symbols = symbols
+        self.trans_func = None
         self.curr_state = 1
 
     def Render(self, node):
@@ -111,6 +113,13 @@ class NFA:
             self.Render(node.a)
         )
 
+        # node a last state to first epsilon
+        self.dot.edge(
+            str(self.curr_state),
+            str(first_node + 1),
+            'e'
+        )
+
         self.curr_state += 1
 
         # Second epsilon
@@ -124,13 +133,6 @@ class NFA:
         self.dot.edge(
             str(first_node),
             str(self.curr_state),
-            'e'
-        )
-
-        # Last state to first epsilon
-        self.dot.edge(
-            str(self.curr_state),
-            str(first_node + 1),
             'e'
         )
 
@@ -198,8 +200,34 @@ class NFA:
             'e'
         )
 
+    def GetTransitionTable(self):
+
+        states = [i.replace('\t', '')
+                  for i in self.dot.source.split('\n') if '->' in i and '=' in i]
+
+        self.trans_func = dict.fromkeys(
+            [str(s) for s in range(self.curr_state + 1)])
+
+        self.trans_func[str(self.curr_state)] = dict()
+
+        for state in states:
+            splitted = state.split(' ')
+            init = splitted[0]
+            final = splitted[2]
+
+            symbol_index = splitted[3].index('=')
+            symbol = splitted[3][symbol_index + 1]
+
+            try:
+                self.trans_func[init][symbol].append(final)
+            except:
+                self.trans_func[init] = {symbol: [final]}
+
+        return self.trans_func
+
     def WriteNFADiagram(self):
         source = self.dot.source
+
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
 

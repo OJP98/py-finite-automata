@@ -1,6 +1,7 @@
 from reader import Reader
 from parsing import Parser
 from nfa import NFA
+from dfa import DFA
 
 # if __name__ == "__main__":
 
@@ -23,7 +24,8 @@ from nfa import NFA
 
 #         exit(1)
 
-string = 'ab?|cd+'
+# string = input('Regular expression: ')
+string = 'a*|b'
 reader = Reader(string)
 tokens = reader.CreateTokens()
 parser = Parser(tokens)
@@ -32,8 +34,17 @@ tree = parser.Parse()
 # NFA
 _nfa = NFA(tree, reader.GetSymbols())
 _nfa.Render(tree)
-_nfa.GetFinalStates()
 _nfa.WriteNFADiagram()
+
+trans_table = _nfa.GetTransitionTable()
+total_states = _nfa.GetFinalStates()
+symbols = _nfa.symbols
+
+# DFA
+_dfa = DFA(trans_table, symbols, total_states)
+_dfa.TransformNFAToDFA()
+
+
 print(f'''
         tokens: {list(Reader(string).CreateTokens())}
         parsed tree: {tree}
