@@ -25,7 +25,7 @@ from dfa import DFA
 #         exit(1)
 
 # string = input('Regular expression: ')
-string = '(a|e)b(a+)c?'
+string = 'ab*ab*'
 print(string)
 reader = Reader(string)
 tokens = reader.CreateTokens()

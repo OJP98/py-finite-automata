@@ -17,7 +17,10 @@ class DFA:
         self.nodes = []
         self.iterations = 0
 
-        self.symbols.remove('e')
+        try:
+            self.symbols.remove('e')
+        except:
+            pass
 
     def MoveTo(self, node_id, eval_symbol='e', array=[], add_initial=False, move_once=False):
 
@@ -123,7 +126,8 @@ class DFA:
         dfa = SimpleDFA(states, alphabet, initial_state,
                         set(self.accepting_states), self.table)
 
-        graph = dfa.trim().to_graphviz()
+        graph = dfa.trim().minimize().to_graphviz()
+        graph.attr('node', shape='circle')
         graph.attr(rankdir='LR')
 
         source = graph.source
