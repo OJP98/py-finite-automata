@@ -3,7 +3,7 @@ from pythomata import SimpleDFA
 from graphviz import Digraph
 from utils import WriteToFile
 
-STATES = 'ABCDEFGHIJKLMNOPQRTUVWXYZ'
+STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 class DFA:
@@ -36,10 +36,20 @@ class DFA:
                 for new_node_id in node.next_states[eval_symbol]:
                     arr += [*self.MoveTo(int(new_node_id), eval_symbol, arr)]
 
+        if add_initial:
+            arr.append(node_id)
+
         return list(set(arr))
 
     def EvaluateClosure(self, closure, node, symbols, curr_state):
 
+        if not closure:
+            closure = self.MoveTo(0, add_initial=True)
+            self.states[curr_state] = closure
+            if self.final_dfa_state in closure:
+                self.accepting_states.append(curr_state)
+
+        print(closure)
         print(self.states)
         for symbol in symbols:
             symbol_closure = list()
@@ -62,13 +72,12 @@ class DFA:
                     print(f'{symbol} creó UN NUEVO ESTADO')
                     self.iterations += 1
                     new_state = STATES[self.iterations]
-                    curr_state_name = STATES[self.iterations - 1]
 
                     try:
-                        curr_dict = self.table[curr_state_name]
+                        curr_dict = self.table[curr_state]
                         curr_dict[symbol] = new_state
                     except:
-                        self.table[curr_state_name] = {symbol: new_state}
+                        self.table[curr_state] = {symbol: new_state}
 
                     try:
                         self.table[new_state]
@@ -84,21 +93,17 @@ class DFA:
                         new_set, value, symbols, new_state)
 
                 else:
-                    # The state already exists, add reference to itself
-                    # curr_state_name = STATES[self.iterations]
-
                     for S, V in self.states.items():
-                        # print('new_set:', new_set, 'V:', V)
-                        # if all(e in V for e in new_set):
                         if new_set == V:
-                            curr_dict = self.table[S]
-                            curr_dict[symbol] = S
-                            self.table[S] = curr_dict
-                    # curr_state_name = STATES[self.iterations]
-                    # self.table[curr_state_name] = {symbol: curr_state_name}
 
-                    if self.final_dfa_state in new_set:
-                        self.accepting_states.append(curr_state_name)
+                            try:
+                                curr_dict = self.table[curr_state]
+                            except:
+                                self.table[curr_state] = {}
+                                curr_dict = self.table[curr_state]
+
+                            curr_dict[symbol] = S
+                            self.table[curr_state] = curr_dict
 
     def GetDStates(self):
         for state, values in self.trans_table.items():
@@ -106,17 +111,9 @@ class DFA:
 
     def TransformNFAToDFA(self):
         self.GetDStates()
-        initial_closure = self.MoveTo(0, add_initial=True)
-        self.states['A'] = initial_closure
-
-        if self.final_dfa_state in initial_closure:
-            self.accepting_states.append('A')
-
-        print(initial_closure)
-        self.EvaluateClosure(initial_closure, 0, self.symbols, 'A')
+        self.EvaluateClosure([], 0, self.symbols, 'A')
         pprint(self.states)
         pprint(self.table)
-        # print(self.accepting_states)
 
     def GraphDFA(self):
         states = set(self.table.keys())
