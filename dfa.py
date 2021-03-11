@@ -17,6 +17,8 @@ class DFA:
         self.nodes = []
         self.iterations = 0
 
+        self.symbols.remove('e')
+
     def MoveTo(self, node_id, eval_symbol='e', array=[], add_initial=False, move_once=False):
 
         arr = array
@@ -64,10 +66,10 @@ class DFA:
                     [node.UnMark() for node in self.nodes]
 
                 new_set += list(set([*symbol_closure, *e_closure]))
-                print(f'en el estado {curr_state}, {symbol} generó {new_set}')
+                # print(f'en el estado {curr_state}, {symbol} generó {new_set}')
 
                 if not new_set in self.states.values():
-                    print(f'{symbol} creó UN NUEVO ESTADO')
+                    # print(f'{symbol} creó UN NUEVO ESTADO')
                     self.iterations += 1
                     new_state = STATES[self.iterations]
 
