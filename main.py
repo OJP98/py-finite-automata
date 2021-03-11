@@ -25,7 +25,7 @@ from dfa import DFA
 #         exit(1)
 
 # string = input('Regular expression: ')
-string = 'a*|b'
+string = '(a|b)*abb'
 print(string)
 reader = Reader(string)
 tokens = reader.CreateTokens()
@@ -42,13 +42,14 @@ print(f'''
 # NFA
 _nfa = NFA(tree, reader.GetSymbols())
 _nfa.Render(tree)
-_nfa.GetFinalStates()
-_nfa.WriteNFADiagram()
+final_states = _nfa.GetFinalStates()
+# _nfa.WriteNFADiagram()
 
 trans_table = _nfa.GetTransitionTable()
 total_states = _nfa.GetFinalStates()
 symbols = _nfa.symbols
 
 # DFA
-_dfa = DFA(trans_table, symbols, total_states)
+_dfa = DFA(trans_table, symbols, total_states, final_states)
 _dfa.TransformNFAToDFA()
+_dfa.GraphDFA()

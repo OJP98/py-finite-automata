@@ -233,4 +233,4 @@ class NFA:
     def GetFinalStates(self):
         self.dot.node(str(self.curr_state), shape='doublecircle')
         self.final_states.append(self.curr_state)
-        return self.final_states
+        return self.curr_state
