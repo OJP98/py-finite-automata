@@ -36,15 +36,13 @@ class DFA:
                 for new_node_id in node.next_states[eval_symbol]:
                     arr += [*self.MoveTo(int(new_node_id), eval_symbol, arr)]
 
-        if add_initial:
-            arr.append(node_id)
-
         return list(set(arr))
 
     def EvaluateClosure(self, closure, node, symbols, curr_state):
 
         if not closure:
             closure = self.MoveTo(0, add_initial=True)
+            closure.append(0)
             self.states[curr_state] = closure
             if self.final_dfa_state in closure:
                 self.accepting_states.append(curr_state)
