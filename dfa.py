@@ -127,7 +127,6 @@ class DFA:
                         set(self.accepting_states), self.table)
 
         graph = dfa.trim().minimize().to_graphviz()
-        graph.attr('node', shape='circle')
         graph.attr(rankdir='LR')
 
         source = graph.source
@@ -149,12 +148,3 @@ class Node:
 
     def __repr__(self):
         return f'{self.num} - {self.visited}: {self.next_states}'
-
-
-class DState:
-    def __init__(self, num, trans):
-        self.num = num
-        self.trans = trans
-
-    def __repr__(self):
-        return f'{self.num}: {self.trans}'
