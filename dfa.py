@@ -126,7 +126,7 @@ class DFA:
         dfa = SimpleDFA(states, alphabet, initial_state,
                         set(self.accepting_states), self.table)
 
-        graph = dfa.trim().minimize().to_graphviz()
+        graph = dfa.trim().to_graphviz()
         graph.attr(rankdir='LR')
 
         source = graph.source

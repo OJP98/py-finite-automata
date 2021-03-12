@@ -3,7 +3,7 @@ from parsing import Parser
 from nfa import NFA
 from dfa import DFA
 from direct_dfa import DDFA
-from test import DirectReader
+from direct_reader import DirectReader
 
 # if __name__ == "__main__":
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
             symbols: {reader.GetSymbols()}
             ''')
 
-    ddfa = DDFA(tree)
+    ddfa = DDFA(tree, reader.GetSymbols())
 
 
 # # NFA
