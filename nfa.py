@@ -246,11 +246,12 @@ class NFA:
         for trans_symbol in transitions:
             print('TRANSICIONES SON', transitions)
 
-            if not eval_regex and str(self.final_states) in transitions['e']:
-                self.regexAccepted = True
-                return
-
             if trans_symbol == 'e':
+
+                if not eval_regex and str(self.final_states) in transitions['e']:
+                    self.regexAccepted = True
+                    return
+
                 for state in transitions['e']:
 
                     if self.regexAccepted != None:
@@ -274,6 +275,9 @@ class NFA:
                     elif str(self.final_states) != curr_state:
                         for state in transitions[trans_symbol]:
                             self.EvalNext('e', state, None)
+                        if self.regexAccepted != None:
+                            return
+                        self.regexAccepted = False
 
                 if self.regexAccepted != None:
                     return

@@ -133,7 +133,7 @@ class DFA:
 
         source = graph.source
         WriteToFile('./output/DFA.gv', source)
-        graph.render('./output/DFA.gv', view=True)
+        graph.render('./output/DFA.gv', format='pdf', view=True)
 
 
 class Node:
