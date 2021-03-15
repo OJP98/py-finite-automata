@@ -19,4 +19,4 @@ class Token:
         self.precedence = type.value
 
     def __repr__(self):
-        return f'{self.type.name}'
+        return f'{self.type.name}: {self.value}'

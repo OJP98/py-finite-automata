@@ -63,7 +63,7 @@ if __name__ == "__main__":
             direct_tokens = direct_reader.CreateTokens()
             direct_parser = Parser(direct_tokens)
             direct_tree = direct_parser.Parse()
-            print('\n\tParsed tree:', tree)
+            print('\n\tParsed tree:', direct_tree)
 
         if opt == '2':
             if not regex:

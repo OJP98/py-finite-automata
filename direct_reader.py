@@ -9,6 +9,7 @@ class DirectReader:
         self.string = iter(string.replace(' ', ''))
         self.string = iter(string.replace('e', ''))
         self.input = set()
+        self.rparPending = False
         self.Next()
 
     def Next(self):
@@ -32,8 +33,27 @@ class DirectReader:
                     yield Token(TokenType.APPEND, '.')
 
             elif self.curr_char == '|':
-                self.Next()
                 yield Token(TokenType.OR, '|')
+
+                self.Next()
+
+                if self.curr_char != None and self.curr_char != '(':
+                    yield Token(TokenType.LPAR)
+
+                    while self.curr_char != None and self.curr_char not in '*+?':
+                        if self.curr_char in LETTERS:
+                            self.input.add(self.curr_char)
+                            yield Token(TokenType.LETTER, self.curr_char)
+
+                            self.Next()
+                            if self.curr_char != None and \
+                                    (self.curr_char in LETTERS or self.curr_char == '('):
+                                yield Token(TokenType.APPEND, '.')
+
+                    if self.curr_char != None and self.curr_char in ')*+?':
+                        self.rparPending = True
+                    else:
+                        yield Token(TokenType.RPAR, ')')
 
             elif self.curr_char == '(':
                 self.Next()
@@ -56,6 +76,10 @@ class DirectReader:
                 elif self.curr_char == '?':
                     self.Next()
                     yield Token(TokenType.QUESTION)
+
+                if self.rparPending:
+                    yield Token(TokenType.RPAR)
+                    self.rparPending = False
 
                 # Finally, check if we need to add an append token
                 if self.curr_char != None and \
