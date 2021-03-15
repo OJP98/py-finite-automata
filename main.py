@@ -5,58 +5,39 @@ from dfa import DFA
 from direct_dfa import DDFA
 from direct_reader import DirectReader
 
-# if __name__ == "__main__":
-
-#     while True:
-#         string = input('Type an expression to evaluate: ')
-#         if string == 'exit':
-#             break
-
-#         reader = Reader(string)
-#         tokens = reader.CreateTokens()
-#         parser = Parser(tokens)
-#         tree = parser.Parse()
-#         _nfa = NFA(tree, reader.GetSymbols())
-
-#         print(f'''
-#                 tokens: {list(Reader(string).CreateTokens())}
-#                 parsed tree: {tree}
-#                 symbols: {reader.GetSymbols()}
-#                 ''')
-
-#         exit(1)
-
-# string = input('Regular expression: ')
-
 if __name__ == "__main__":
-    string = '(a|b)*abb'
-    print(string)
-    # reader = Reader(string)
-    reader = DirectReader(string)
+    string = 'abb(a|b)*'
+    regex = 'abbab'
+    print('EXPRESIÓN:', string)
+    reader = Reader(string)
     tokens = reader.CreateTokens()
     parser = Parser(tokens)
     tree = parser.Parse()
 
     print(f'''
-            tokens: {list(Reader(string).CreateTokens())}
-            parsed tree: {tree}
-            symbols: {reader.GetSymbols()}
+            Parsed tree: {tree}
             ''')
 
-    ddfa = DDFA(tree, reader.GetSymbols())
+#     ddfa = DDFA(tree, reader.GetSymbols())
+#     ddfa.GraphDFA()
 
+    # NFA
+    _nfa = NFA(tree, reader.GetSymbols(), regex)
+    _nfa.WriteNFADiagram()
+    nfa_regex = _nfa.EvalRegex()
+    print(nfa_regex)
 
-# # NFA
-# _nfa = NFA(tree, reader.GetSymbols())
-# _nfa.Render(tree)
-# final_states = _nfa.GetFinalStates()
-# _nfa.WriteNFADiagram()
+    # DFA
+    # _dfa = DFA(_nfa.trans_func, _nfa.symbols,
+    #            _nfa.curr_state, _nfa.final_states)
 
-# trans_table = _nfa.GetTransitionTable()
-# total_states = _nfa.GetFinalStates()
-# symbols = _nfa.symbols
+    # _dfa.TransformNFAToDFA()
+    # _dfa.GraphDFA()
 
-# # DFA
-# _dfa = DFA(trans_table, symbols, total_states, final_states)
-# _dfa.TransformNFAToDFA()
-# _dfa.GraphDFA()
+    # DIRECT DFA
+    # reader = DirectReader(string)
+    # tokens = reader.CreateTokens()
+    # parser = Parser(tokens)
+    # tree = parser.Parse()
+    # ddfa = DDFA(tree, reader.GetSymbols())
+    # ddfa.GraphDFA()

@@ -1,47 +1,54 @@
 from pythomata import SimpleDFA
 from graphviz import Digraph
 from utils import WriteToFile
+from pprint import pprint
 
 RAW_STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-STATES = iter('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+STATES = iter(RAW_STATES)
 
 
 class DDFA:
     def __init__(self, tree, symbols):
         self.tree = tree
-        self.nodes = list()
-        self.iter = 1
         self.symbols = symbols
+        self.nodes = list()
         self.states = list()
         self.table = dict()
         self.final_states = set()
         self.hash = None
+        self.iter = 1
 
-        self.ParseTree(tree)
-        self.CalcFollowPos()
-        print(self.nodes)
-        print(self.states)
-        print(self.table)
-        print(self.final_states)
-
-        self.GraphDFA()
+        # print(self.nodes)
+        # print(self.states)
+        # print(self.table)
+        # print(self.final_states)
 
     def CalcFollowPos(self):
+        print(f'\nFOLLOWPOS EN EL ÁRBOL DE SINTAXIS')
         for node in self.nodes:
             if node.value == '*':
                 for i in node.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.firstpos
+                print(
+                    '\tSe encuentra nodo * calcular followpos de los hijos')
             elif node.value == '.':
                 for i in node.c1.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.c2.firstpos
+                print(
+                    '\tSe encuentra nodo ., calcular followpos de los hijos')
 
         # Initiate state generation
         initial_state = self.nodes[-1].firstpos
         # Filter the nodes that have a symbol
         self.nodes = list(filter(lambda x: x._id, self.nodes))
         self.hash = self.nodes[-1]._id
+
+        print('\nFOLLOWPOS FINAL:')
+        print(self.nodes)
+
+        print('\nGENERACIÓN DE ESTADOS')
         # Recursion
         self.CalcNewStates(initial_state, next(STATES))
 
@@ -52,6 +59,7 @@ class DDFA:
             if self.hash in state:
                 self.final_states.update(curr_state)
 
+        print('\tEN EL ESTADO', state)
         for symbol in self.symbols:
 
             # Get all the nodes with the same symbol in followpos
@@ -63,6 +71,7 @@ class DDFA:
             for node in same_symbols:
                 new_state.update(node.followpos)
 
+            print(f'\t{symbol} genera {new_state}')
             # new state is not in the state list
             if new_state not in self.states and new_state:
 
@@ -86,6 +95,8 @@ class DDFA:
                 if self.hash in new_state:
                     self.final_states.update(next_state)
 
+                print(
+                    f'\t{new_state} es un estado nuevo, se iterará por cada símbolo\n')
                 self.CalcNewStates(new_state, next_state)
 
             elif new_state:
@@ -101,6 +112,8 @@ class DDFA:
                     self.table[curr_state] = {}
                     existing_states = self.table[curr_state]
 
+                print(
+                    f'\t{new_state} ya existe, se agrega la transición {curr_state} -> {symbol} -> {state_ref}\n')
                 existing_states[symbol] = state_ref
                 self.table[curr_state] = existing_states
 
@@ -162,6 +175,17 @@ class DDFA:
         self.ParseTree(node.a)
 
     def GraphDFA(self):
+        self.ParseTree(self.tree)
+        print('\nEL ÁRBOL DE SINTAXIS ES:')
+        print(self.nodes)
+        self.CalcFollowPos()
+
+        print('\n ESTADOS:')
+        pprint(self.states)
+
+        print('\nFUNCIÓN DE TRANSICIÓN')
+        pprint(self.table)
+
         states = set(self.table.keys())
         alphabet = set(self.symbols)
         initial_state = 'A'
@@ -189,5 +213,8 @@ class Node:
         self.c2 = c2
 
     def __repr__(self):
+        if self.followpos:
+            return f'''
+        {self._id} | {self.value} | {self.followpos}'''
         return f'''
-    {self.value} | {self._id} | {self.firstpos} | {self.followpos}'''
+    {self.value} | firstpos {self.firstpos} | lastpos: {self.lastpos}'''

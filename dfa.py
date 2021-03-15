@@ -52,8 +52,8 @@ class DFA:
             if self.final_dfa_state in closure:
                 self.accepting_states.append(curr_state)
 
-        print(closure)
-        print(self.states)
+        # print(closure)
+        # print(self.states)
         for symbol in symbols:
             symbol_closure = list()
             new_set = list()
@@ -69,10 +69,10 @@ class DFA:
                     [node.UnMark() for node in self.nodes]
 
                 new_set += list(set([*symbol_closure, *e_closure]))
-                # print(f'en el estado {curr_state}, {symbol} generó {new_set}')
+                print(f'en el estado {curr_state}, {symbol} generó {new_set}')
 
                 if not new_set in self.states.values():
-                    # print(f'{symbol} creó UN NUEVO ESTADO')
+                    print(f'{symbol} creó UN NUEVO ESTADO')
                     self.iterations += 1
                     new_state = STATES[self.iterations]
 
@@ -115,7 +115,9 @@ class DFA:
     def TransformNFAToDFA(self):
         self.GetDStates()
         self.EvaluateClosure([], 0, self.symbols, 'A')
+        print('Los estados con su respectiva representación son:')
         pprint(self.states)
+        print('\n La función de transición resultanto es:')
         pprint(self.table)
 
     def GraphDFA(self):

@@ -6,7 +6,7 @@ from utils import WriteToFile
 
 
 class NFA:
-    def __init__(self, init_node, symbols):
+    def __init__(self, init_node, symbols, regex):
         self.dot = Digraph(comment='Diagrama NFA', strict=True)
         self.dot.attr(rankdir='LR')
         self.dot.attr('node', shape='circle')
@@ -15,6 +15,12 @@ class NFA:
         self.symbols = symbols
         self.trans_func = None
         self.curr_state = 1
+
+        self.Render(init_node)
+        self.trans_func = self.GetTransitionTable()
+        self.final_states = self.GetFinalStates()
+        self.regexAccepted = None
+        self.regex = regex
 
     def Render(self, node):
         self.prev_state = self.curr_state
@@ -225,8 +231,77 @@ class NFA:
 
         return self.trans_func
 
+    def EvalRegex(self):
+        self.EvalNext(self.regex[0], '0', self.regex)
+        return self.regexAccepted
+
+    def EvalNext(self, eval_symbol, curr_state, eval_regex):
+
+        print('\nVAMOS A EVALUAR', eval_symbol, 'DESDE', curr_state)
+
+        if self.regexAccepted != None:
+            return
+
+        transitions = self.trans_func[curr_state]
+        for trans_symbol in transitions:
+            print('TRANSICIONES SON', transitions)
+
+            if not eval_regex and str(self.final_states) in transitions['e']:
+                self.regexAccepted = True
+                return
+
+            if trans_symbol == 'e':
+                for state in transitions['e']:
+
+                    if self.regexAccepted != None:
+                        break
+
+                    self.EvalNext(eval_symbol, state, eval_regex)
+
+            elif trans_symbol == eval_symbol:
+
+                next_regex = eval_regex[1:]
+                try:
+                    next_symbol = next_regex[0]
+                except:
+                    next_symbol = None
+
+                if not next_symbol:
+                    if str(self.final_states) in transitions[trans_symbol]:
+                        self.regexAccepted = True
+                        return
+
+                    elif str(self.final_states) != curr_state:
+                        for state in transitions[trans_symbol]:
+                            self.EvalNext('e', state, None)
+
+                if self.regexAccepted != None:
+                    return
+
+                for state in transitions[trans_symbol]:
+
+                    if not next_symbol and str(state) == self.final_states:
+                        self.regexAccepted = True
+                        return
+
+                    self.EvalNext(next_symbol, state, next_regex)
+
+            else:
+                print('NO EXISTE EN ESTA TRANSICION')
+
     def WriteNFADiagram(self):
         source = self.dot.source
+
+        debug_string = f'''
+NFA:
+- Símbolos: {self.symbols}
+- Estado final: {self.final_states}
+- Tabla de transición:
+        '''
+
+        print(debug_string)
+        pprint(self.trans_func)
+
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
 
