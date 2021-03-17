@@ -4,12 +4,13 @@ from nfa import NFA
 from dfa import DFA
 from direct_dfa import DDFA
 from direct_reader import DirectReader
+from time import process_time
 
 program_title = '''
 
 #        FINITE AUTOMATA        #
 
-Generate NFA's of DFA's based on a regular epression and compare times simulating a string!
+Generate NFA's of DFA's based on a regular epression and compare times simulating a string! NOTE: for epsilon expression, please use the letter "e"
 '''
 
 main_menu = '''
@@ -85,15 +86,25 @@ if __name__ == "__main__":
                     print(thompson_msg)
                     print(type_string_msg)
                     regex_input = input('> ')
+
                     nfa = NFA(tree, reader.GetSymbols(), regex_input)
+                    start_time = process_time()
                     nfa_regex = nfa.EvalRegex()
+                    stop_time = process_time()
+
+                    print('\nTime to evaluate: {:.5E} seconds'.format(
+                        stop_time - start_time))
                     print('Does the string belongs to the regex (NFA)?')
                     print('>', nfa_regex)
 
                     dfa = DFA(nfa.trans_func, nfa.symbols,
                               nfa.curr_state, nfa.final_states, regex_input)
                     dfa.TransformNFAToDFA()
+                    start_time = process_time()
                     dfa_regex = dfa.EvalRegex()
+                    stop_time = process_time()
+                    print('\nTime to evaluate: {:.5E} seconds'.format(
+                        stop_time - start_time))
                     print('Does the string belongs to the regex (DFA)?')
                     print('>', dfa_regex)
 
@@ -110,7 +121,11 @@ if __name__ == "__main__":
                     regex_input = input('> ')
                     ddfa = DDFA(
                         direct_tree, direct_reader.GetSymbols(), regex_input)
+                    start_time = process_time()
                     ddfa_regex = ddfa.EvalRegex()
+                    stop_time = process_time()
+                    print('\nTime to evaluate: {:.5E} seconds'.format(
+                        stop_time - start_time))
                     print('Does the string belongs to the regex?')
                     print('>', ddfa_regex)
 

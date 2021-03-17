@@ -121,15 +121,10 @@ class DFA:
             if not symbol in self.symbols:
                 return 'No'
 
-            # print(f'\nEvaluando {symbol} en {curr_state}')
             try:
                 curr_state = self.table[curr_state][symbol]
-                # print(f'Nuevo estado: {curr_state}')
             except:
-                # print(f'{symbol} no está en {curr_state}')
-                if curr_state in self.accepting_states:
-                    # print(
-                    # f'se acepta porque está en estado final (iniciando de nuevo...)')
+                if curr_state in self.accepting_states and symbol in self.table['A']:
                     curr_state = self.table['A'][symbol]
                 else:
                     return 'No'

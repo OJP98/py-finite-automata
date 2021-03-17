@@ -24,18 +24,18 @@ class DDFA:
             pass
 
         self.ParseTree(self.tree)
-        print('\nEL ÁRBOL DE SINTAXIS ES:')
-        print(self.nodes)
+        # print('\nEL ÁRBOL DE SINTAXIS ES:')
+        # print(self.nodes)
         self.CalcFollowPos()
 
-        print('\n ESTADOS:')
+        # print('\n ESTADOS:')
         pprint(self.states)
 
-        print('\nFUNCIÓN DE TRANSICIÓN')
+        # print('\nFUNCIÓN DE TRANSICIÓN')
         pprint(self.table)
 
-        print(self.nodes)
-        print(self.final_states)
+        # print(self.nodes)
+        # print(self.final_states)
 
     def CalcFollowPos(self):
         # print(f'\nFOLLOWPOS EN EL ÁRBOL DE SINTAXIS')
@@ -44,14 +44,10 @@ class DDFA:
                 for i in node.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.firstpos
-                # print(
-                    # '\tSe encuentra nodo * calcular followpos de los hijos')
             elif node.value == '.':
                 for i in node.c1.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.c2.firstpos
-                # print(
-                    # '\tSe encuentra nodo ., calcular followpos de los hijos')
 
         # Initiate state generation
         initial_state = self.nodes[-1].firstpos
@@ -85,7 +81,6 @@ class DDFA:
             for node in same_symbols:
                 new_state.update(node.followpos)
 
-            print(f'\t{state} -> {symbol} -> {new_state}')
             # new state is not in the state list
             if new_state not in self.states and new_state:
 
@@ -226,15 +221,11 @@ class DDFA:
 
             if not symbol in self.symbols:
                 return 'No'
-            # print(f'\nEvaluando {symbol} en {curr_state}')
+
             try:
                 curr_state = self.table[curr_state][symbol]
-                # print(f'Nuevo estado: {curr_state}')
             except:
-                # print(f'{symbol} no está en {curr_state}')
                 if curr_state in self.final_states and symbol in self.table['A']:
-                    # print(
-                    #     f'se acepta porque está en estado final (iniciando de nuevo...)')
                     curr_state = self.table['A'][symbol]
                 else:
                     return 'No'
