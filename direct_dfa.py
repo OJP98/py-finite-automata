@@ -137,7 +137,8 @@ class DDFA:
         return method(node)
 
     def LetterNode(self, node):
-        new_node = Node(self.iter, [self.iter], [self.iter], value=node.value)
+        new_node = Node(self.iter, [self.iter], [
+                        self.iter], value=node.value, nullable=False)
         self.nodes.append(new_node)
         return new_node
 
@@ -183,10 +184,41 @@ class DDFA:
         return Node(None, firstpos, lastpos, True, '*', node_a)
 
     def PlusNode(self, node):
-        self.ParseTree(node.a)
+        node_a = self.ParseTree(node.a)
+
+        self.iter += 1
+
+        node_b = self.KleeneNode(node)
+
+        is_nullable = node_a.nullable and node_b.nullable
+        if node_a.nullable:
+            firstpos = node_a.firstpos + node_b.firstpos
+        else:
+            firstpos = node_a.firstpos
+
+        if node_b.nullable:
+            lastpos = node_b.lastpos + node_a.lastpos
+        else:
+            lastpos = node_b.lastpos
+
+        self.nodes.append(
+            Node(None, firstpos, lastpos, is_nullable, '.', node_a, node_b))
+
+        return Node(None, firstpos, lastpos, is_nullable, '.', node_a, node_b)
 
     def QuestionNode(self, node):
-        self.ParseTree(node.a)
+        # Node_a is epsilon
+        node_a = Node(None, list(), list(), True)
+        self.iter += 1
+        node_b = self.ParseTree(node.a)
+
+        is_nullable = node_a.nullable or node_b.nullable
+        firstpos = node_a.firstpos + node_b.firstpos
+        lastpos = node_a.lastpos + node_b.lastpos
+
+        self.nodes.append(Node(None, firstpos, lastpos,
+                               is_nullable, '|', node_a, node_b))
+        return Node(None, firstpos, lastpos, is_nullable, '|', node_a, node_b)
 
     def EvalRegex(self):
         curr_state = 'A'
@@ -200,7 +232,7 @@ class DDFA:
                 # print(f'Nuevo estado: {curr_state}')
             except:
                 # print(f'{symbol} no está en {curr_state}')
-                if curr_state in self.final_states:
+                if curr_state in self.final_states and symbol in self.table['A']:
                     # print(
                     #     f'se acepta porque está en estado final (iniciando de nuevo...)')
                     curr_state = self.table['A'][symbol]
@@ -243,4 +275,5 @@ class Node:
     firstpos: {self.firstpos}
     lastpos: {self.lastpos}
     followpos: {self.followpos}
+    nullabe: {self.nullable}
     '''

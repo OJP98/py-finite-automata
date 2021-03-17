@@ -232,19 +232,25 @@ class NFA:
         return self.trans_func
 
     def EvalRegex(self):
-        self.EvalNext(self.regex[0], '0', self.regex)
-        return self.regexAccepted
+        try:
+            self.EvalNext(self.regex[0], '0', self.regex)
+            return 'Yes' if self.regexAccepted else 'No'
+        except RecursionError:
+            if self.regex[0] in self.symbols and self.regex[0] != 'e':
+                return 'Yes'
+            else:
+                return 'No'
 
     def EvalNext(self, eval_symbol, curr_state, eval_regex):
 
-        print('\nVAMOS A EVALUAR', eval_symbol, 'DESDE', curr_state)
+        # print('\nVAMOS A EVALUAR', eval_symbol, 'DESDE', curr_state)
 
         if self.regexAccepted != None:
             return
 
         transitions = self.trans_func[curr_state]
         for trans_symbol in transitions:
-            print('TRANSICIONES SON', transitions)
+            # print('TRANSICIONES SON', transitions)
 
             if trans_symbol == 'e':
 
@@ -289,8 +295,8 @@ class NFA:
 
                     self.EvalNext(next_symbol, state, next_regex)
 
-            else:
-                print('NO EXISTE EN ESTA TRANSICION')
+            # else:
+                # print('NO EXISTE EN ESTA TRANSICION')
 
     def WriteNFADiagram(self):
         source = self.dot.source
@@ -302,8 +308,8 @@ NFA:
 - Tabla de transición:
         '''
 
-        print(debug_string)
-        pprint(self.trans_func)
+        # print(debug_string)
+        # pprint(self.trans_func)
 
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
