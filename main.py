@@ -54,20 +54,28 @@ if __name__ == "__main__":
             print(type_regex_msg)
             regex = input('> ')
 
-            reader = Reader(regex)
-            tokens = reader.CreateTokens()
-            parser = Parser(tokens)
-            tree = parser.Parse()
+            try:
+                reader = Reader(regex)
+                tokens = reader.CreateTokens()
+                parser = Parser(tokens)
+                tree = parser.Parse()
 
-            direct_reader = DirectReader(regex)
-            direct_tokens = direct_reader.CreateTokens()
-            direct_parser = Parser(direct_tokens)
-            direct_tree = direct_parser.Parse()
-            print('\n\tParsed tree:', direct_tree)
+                direct_reader = DirectReader(regex)
+                direct_tokens = direct_reader.CreateTokens()
+                direct_parser = Parser(direct_tokens)
+                direct_tree = direct_parser.Parse()
+                print('\n\tExpression accepted!')
+                print('\tParsed tree:', tree)
+
+            except AttributeError as e:
+                print(f'\n\tERR: Invalid expression (missing parenthesis)')
+
+            except Exception as e:
+                print(f'\n\tERR: {e}')
 
         if opt == '2':
             if not regex:
-                print('\nERR: You need to set a regular expression first!')
+                print('\n\tERR: You need to set a regular expression first!')
                 opt = None
             else:
                 print(submenu)

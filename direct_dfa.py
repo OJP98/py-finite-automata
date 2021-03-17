@@ -10,7 +10,6 @@ class DDFA:
     def __init__(self, tree, symbols, regex):
         self.tree = tree
         self.symbols = symbols
-        self.symbols.remove('e')
         self.nodes = list()
         self.states = list()
         self.table = dict()
@@ -19,6 +18,10 @@ class DDFA:
         self.iter = 1
         self.regex = regex
         self.STATES = iter(RAW_STATES)
+        try:
+            self.symbols.remove('e')
+        except:
+            pass
 
         self.ParseTree(self.tree)
         print('\nEL ÁRBOL DE SINTAXIS ES:')
