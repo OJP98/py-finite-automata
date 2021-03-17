@@ -22,7 +22,7 @@ What would you like to do?
 submenu = '''
 Select one of the above to test your regular expression:
 
-    1. Use Thompson to generate a NFA and Powerset construction to generate a DFA.
+    1. Use Thompson to generate an NFA and Powerset construction to generate an DFA.
     2. Use direct DFA method.
     0. Back to main menu.
 '''
@@ -83,9 +83,9 @@ if __name__ == "__main__":
                     print('>', nfa_regex)
 
                     dfa = DFA(nfa.trans_func, nfa.symbols,
-                              nfa.curr_state, nfa.final_states)
+                              nfa.curr_state, nfa.final_states, regex_input)
                     dfa.TransformNFAToDFA()
-                    dfa_regex = 'TODO'
+                    dfa_regex = dfa.EvalRegex()
                     print('Does the string belongs to the regex (DFA)?')
                     print('>', dfa_regex)
 
@@ -100,16 +100,19 @@ if __name__ == "__main__":
                     print(direct_dfa_msg)
                     print(type_string_msg)
                     regex_input = input('> ')
-                    ddfa = DDFA(direct_tree, direct_reader.GetSymbols())
-                    ddfa_regex = 'TODO'
+                    ddfa = DDFA(
+                        direct_tree, direct_reader.GetSymbols(), regex_input)
+                    ddfa_regex = ddfa.EvalRegex()
                     print('Does the string belongs to the regex?')
-                    print('>', nfa_regex)
+                    print('>', ddfa_regex)
 
                     print(generate_diagram_msg)
                     generate_diagram = input('> ')
 
                     if generate_diagram == 'y':
                         ddfa.GraphDFA()
+
+                    ddfa = None
 
                 elif method == '3':
                     continue
@@ -120,37 +123,3 @@ if __name__ == "__main__":
         elif opt == '0':
             print('See you later!')
             exit(1)
-
-
-# if __name__ == "__main__":
-#     string = 'abb(a|b)*'
-#     regex = 'abbab'
-#     print('EXPRESIÓN:', string)
-
-#     print(f'''
-#             Parsed tree: {tree}
-#             ''')
-
-#     ddfa = DDFA(tree, reader.GetSymbols())
-#     ddfa.GraphDFA()
-
-    # NFA
-    # _nfa = NFA(tree, reader.GetSymbols(), regex)
-    # _nfa.WriteNFADiagram()
-    # nfa_regex = _nfa.EvalRegex()
-    # print(nfa_regex)
-
-    # DFA
-    # _dfa = DFA(_nfa.trans_func, _nfa.symbols,
-    #            _nfa.curr_state, _nfa.final_states)
-
-    # _dfa.TransformNFAToDFA()
-    # _dfa.GraphDFA()
-
-    # DIRECT DFA
-    # reader = DirectReader(string)
-    # tokens = reader.CreateTokens()
-    # parser = Parser(tokens)
-    # tree = parser.Parse()
-    # ddfa = DDFA(tree, reader.GetSymbols())
-    # ddfa.GraphDFA()

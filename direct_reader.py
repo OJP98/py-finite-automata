@@ -37,10 +37,10 @@ class DirectReader:
 
                 self.Next()
 
-                if self.curr_char != None and self.curr_char != '(':
+                if self.curr_char != None and self.curr_char not in '()':
                     yield Token(TokenType.LPAR)
 
-                    while self.curr_char != None and self.curr_char not in '*+?':
+                    while self.curr_char != None and self.curr_char not in ')*+?':
                         if self.curr_char in LETTERS:
                             self.input.add(self.curr_char)
                             yield Token(TokenType.LETTER, self.curr_char)
@@ -50,8 +50,10 @@ class DirectReader:
                                     (self.curr_char in LETTERS or self.curr_char == '('):
                                 yield Token(TokenType.APPEND, '.')
 
-                    if self.curr_char != None and self.curr_char in ')*+?':
+                    if self.curr_char != None and self.curr_char in '*+?':
                         self.rparPending = True
+                    elif self.curr_char != None and self.curr_char == ')':
+                        yield Token(TokenType.RPAR, ')')
                     else:
                         yield Token(TokenType.RPAR, ')')
 

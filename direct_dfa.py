@@ -4,11 +4,10 @@ from utils import WriteToFile
 from pprint import pprint
 
 RAW_STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-STATES = iter(RAW_STATES)
 
 
 class DDFA:
-    def __init__(self, tree, symbols):
+    def __init__(self, tree, symbols, regex):
         self.tree = tree
         self.symbols = symbols
         self.nodes = list()
@@ -17,27 +16,38 @@ class DDFA:
         self.final_states = set()
         self.hash = None
         self.iter = 1
+        self.regex = regex
+        self.STATES = iter(RAW_STATES)
 
-        # print(self.nodes)
-        # print(self.states)
-        # print(self.table)
-        # print(self.final_states)
+        self.ParseTree(self.tree)
+        print('\nEL ÁRBOL DE SINTAXIS ES:')
+        print(self.nodes)
+        self.CalcFollowPos()
+
+        print('\n ESTADOS:')
+        pprint(self.states)
+
+        print('\nFUNCIÓN DE TRANSICIÓN')
+        pprint(self.table)
+
+        print(self.nodes)
+        print(self.final_states)
 
     def CalcFollowPos(self):
-        print(f'\nFOLLOWPOS EN EL ÁRBOL DE SINTAXIS')
+        # print(f'\nFOLLOWPOS EN EL ÁRBOL DE SINTAXIS')
         for node in self.nodes:
             if node.value == '*':
                 for i in node.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.firstpos
-                print(
-                    '\tSe encuentra nodo * calcular followpos de los hijos')
+                # print(
+                    # '\tSe encuentra nodo * calcular followpos de los hijos')
             elif node.value == '.':
                 for i in node.c1.lastpos:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.c2.firstpos
-                print(
-                    '\tSe encuentra nodo ., calcular followpos de los hijos')
+                # print(
+                    # '\tSe encuentra nodo ., calcular followpos de los hijos')
 
         # Initiate state generation
         initial_state = self.nodes[-1].firstpos
@@ -45,12 +55,12 @@ class DDFA:
         self.nodes = list(filter(lambda x: x._id, self.nodes))
         self.hash = self.nodes[-1]._id
 
-        print('\nFOLLOWPOS FINAL:')
-        print(self.nodes)
+        # print('\nFOLLOWPOS FINAL:')
+        # print(self.nodes)
 
-        print('\nGENERACIÓN DE ESTADOS')
+        # print('\nGENERACIÓN DE ESTADOS')
         # Recursion
-        self.CalcNewStates(initial_state, next(STATES))
+        self.CalcNewStates(initial_state, next(self.STATES))
 
     def CalcNewStates(self, state, curr_state):
 
@@ -59,7 +69,7 @@ class DDFA:
             if self.hash in state:
                 self.final_states.update(curr_state)
 
-        print('\tEN EL ESTADO', state)
+        # print('\tEN EL ESTADO', state)
         for symbol in self.symbols:
 
             # Get all the nodes with the same symbol in followpos
@@ -71,12 +81,12 @@ class DDFA:
             for node in same_symbols:
                 new_state.update(node.followpos)
 
-            print(f'\t{symbol} genera {new_state}')
+            print(f'\t{state} -> {symbol} -> {new_state}')
             # new state is not in the state list
             if new_state not in self.states and new_state:
 
                 self.states.append(new_state)
-                next_state = next(STATES)
+                next_state = next(self.STATES)
 
                 try:
                     self.table[next_state]
@@ -95,8 +105,8 @@ class DDFA:
                 if self.hash in new_state:
                     self.final_states.update(next_state)
 
-                print(
-                    f'\t{new_state} es un estado nuevo, se iterará por cada símbolo\n')
+                # print(
+                #     f'\t{new_state} es un estado nuevo, se iterará por cada símbolo\n')
                 self.CalcNewStates(new_state, next_state)
 
             elif new_state:
@@ -112,8 +122,8 @@ class DDFA:
                     self.table[curr_state] = {}
                     existing_states = self.table[curr_state]
 
-                print(
-                    f'\t{new_state} ya existe, se agrega la transición {curr_state} -> {symbol} -> {state_ref}\n')
+                # print(
+                #     f'\t{new_state} ya existe, se agrega la transición {curr_state} -> {symbol} -> {state_ref}\n')
                 existing_states[symbol] = state_ref
                 self.table[curr_state] = existing_states
 
@@ -134,7 +144,7 @@ class DDFA:
 
         is_nullable = node_a.nullable or node_b.nullable
         firstpos = node_a.firstpos + node_b.firstpos
-        lastpos = node_a.firstpos + node_b.lastpos
+        lastpos = node_a.lastpos + node_b.lastpos
 
         self.nodes.append(Node(None, firstpos, lastpos,
                                is_nullable, '|', node_a, node_b))
@@ -174,18 +184,28 @@ class DDFA:
     def QuestionNode(self, node):
         self.ParseTree(node.a)
 
+    def EvalRegex(self):
+        curr_state = 'A'
+        for symbol in self.regex:
+
+            if not symbol in self.symbols:
+                return 'No'
+            # print(f'\nEvaluando {symbol} en {curr_state}')
+            try:
+                curr_state = self.table[curr_state][symbol]
+                # print(f'Nuevo estado: {curr_state}')
+            except:
+                # print(f'{symbol} no está en {curr_state}')
+                if curr_state in self.final_states:
+                    # print(
+                    #     f'se acepta porque está en estado final (iniciando de nuevo...)')
+                    curr_state = self.table['A'][symbol]
+                else:
+                    return 'No'
+
+        return 'Yes' if curr_state in self.final_states else 'No'
+
     def GraphDFA(self):
-        self.ParseTree(self.tree)
-        print('\nEL ÁRBOL DE SINTAXIS ES:')
-        print(self.nodes)
-        self.CalcFollowPos()
-
-        print('\n ESTADOS:')
-        pprint(self.states)
-
-        print('\nFUNCIÓN DE TRANSICIÓN')
-        pprint(self.table)
-
         states = set(self.table.keys())
         alphabet = set(self.symbols)
         initial_state = 'A'
@@ -198,7 +218,7 @@ class DDFA:
 
         source = graph.source
         WriteToFile('./output/DirectDFA.gv', source)
-        graph.render('./output/DirectDFA.gv', view=True)
+        graph.render('./output/DirectDFA.gv', format='pdf', view=True)
 
 
 class Node:
@@ -213,8 +233,10 @@ class Node:
         self.c2 = c2
 
     def __repr__(self):
-        if self.followpos:
-            return f'''
-        {self._id} | {self.value} | {self.followpos}'''
         return f'''
-    {self.value} | firstpos {self.firstpos} | lastpos: {self.lastpos}'''
+    id: {self._id}
+    value: {self.value}
+    firstpos: {self.firstpos}
+    lastpos: {self.lastpos}
+    followpos: {self.followpos}
+    '''

@@ -277,7 +277,6 @@ class NFA:
                             self.EvalNext('e', state, None)
                         if self.regexAccepted != None:
                             return
-                        self.regexAccepted = False
 
                 if self.regexAccepted != None:
                     return

@@ -7,7 +7,7 @@ STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 class DFA:
-    def __init__(self, trans_table, symbols, states, final_dfa_state):
+    def __init__(self, trans_table, symbols, states, final_dfa_state, regex):
         self.trans_table = trans_table
         self.symbols = symbols
         self.final_dfa_state = final_dfa_state
@@ -16,6 +16,7 @@ class DFA:
         self.accepting_states = list()
         self.nodes = []
         self.iterations = 0
+        self.regex = regex
 
         try:
             self.symbols.remove('e')
@@ -69,12 +70,13 @@ class DFA:
                     [node.UnMark() for node in self.nodes]
 
                 new_set += list(set([*symbol_closure, *e_closure]))
-                print(f'en el estado {curr_state}, {symbol} generó {new_set}')
+                # print(
+                #     f'\nen el estado {curr_state}, {symbol} generó {new_set}')
 
                 if not new_set in self.states.values():
-                    print(f'{symbol} creó UN NUEVO ESTADO')
                     self.iterations += 1
                     new_state = STATES[self.iterations]
+                    # print(f'{symbol} creó el estado {new_state}')
 
                     try:
                         curr_dict = self.table[curr_state]
@@ -96,6 +98,7 @@ class DFA:
                         new_set, value, symbols, new_state)
 
                 else:
+                    # print(f'El estado ya existía, se agrega la referencia:')
                     for S, V in self.states.items():
                         if new_set == V:
 
@@ -107,6 +110,31 @@ class DFA:
 
                             curr_dict[symbol] = S
                             self.table[curr_state] = curr_dict
+                            # print(f'{curr_state} -> {symbol} -> {S}')
+                            break
+
+    def EvalRegex(self):
+        curr_state = 'A'
+
+        for symbol in self.regex:
+
+            if not symbol in self.symbols:
+                return 'No'
+
+            # print(f'\nEvaluando {symbol} en {curr_state}')
+            try:
+                curr_state = self.table[curr_state][symbol]
+                # print(f'Nuevo estado: {curr_state}')
+            except:
+                # print(f'{symbol} no está en {curr_state}')
+                if curr_state in self.accepting_states:
+                    # print(
+                    # f'se acepta porque está en estado final (iniciando de nuevo...)')
+                    curr_state = self.table['A'][symbol]
+                else:
+                    return 'No'
+
+        return 'Yes' if curr_state in self.accepting_states else 'No'
 
     def GetDStates(self):
         for state, values in self.trans_table.items():
@@ -115,10 +143,10 @@ class DFA:
     def TransformNFAToDFA(self):
         self.GetDStates()
         self.EvaluateClosure([], 0, self.symbols, 'A')
-        print('Los estados con su respectiva representación son:')
-        pprint(self.states)
-        print('\n La función de transición resultanto es:')
-        pprint(self.table)
+        # print('Los estados con su respectiva representación son:')
+        # pprint(self.states)
+        # print('\n La función de transición resultante es:')
+        # pprint(self.table)
 
     def GraphDFA(self):
         states = set(self.table.keys())
