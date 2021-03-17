@@ -7,7 +7,7 @@ class DirectReader:
 
     def __init__(self, string: str):
         self.string = iter(string.replace(' ', ''))
-        self.string = iter(string.replace('e', ''))
+        # self.string = iter(string.replace('e', ''))
         self.input = set()
         self.rparPending = False
         self.Next()

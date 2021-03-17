@@ -10,6 +10,7 @@ class DDFA:
     def __init__(self, tree, symbols, regex):
         self.tree = tree
         self.symbols = symbols
+        self.symbols.remove('e')
         self.nodes = list()
         self.states = list()
         self.table = dict()
