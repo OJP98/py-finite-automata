@@ -8,37 +8,34 @@ RAW_STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 class DDFA:
     def __init__(self, tree, symbols, regex):
-        self.tree = tree
-        self.symbols = symbols
+
+        # Useful for syntax tree
         self.nodes = list()
+
+        # FA properties
+        self.symbols = symbols
         self.states = list()
-        self.table = dict()
-        self.final_states = set()
-        self.hash = None
-        self.iter = 1
+        self.trans_func = dict()
+        self.accepting_states = set()
+        self.initial_state = 'A'
+
+        # Class properties
+        self.tree = tree
         self.regex = regex
+        self.augmented_state = None
+        self.iter = 1
+
         self.STATES = iter(RAW_STATES)
         try:
             self.symbols.remove('e')
         except:
             pass
 
+        # Initialize dfa construction
         self.ParseTree(self.tree)
-        # print('\nEL ÁRBOL DE SINTAXIS ES:')
-        # print(self.nodes)
         self.CalcFollowPos()
 
-        # print('\n ESTADOS:')
-        pprint(self.states)
-
-        # print('\nFUNCIÓN DE TRANSICIÓN')
-        pprint(self.table)
-
-        # print(self.nodes)
-        # print(self.final_states)
-
     def CalcFollowPos(self):
-        # print(f'\nFOLLOWPOS EN EL ÁRBOL DE SINTAXIS')
         for node in self.nodes:
             if node.value == '*':
                 for i in node.lastpos:
@@ -51,14 +48,11 @@ class DDFA:
 
         # Initiate state generation
         initial_state = self.nodes[-1].firstpos
+
         # Filter the nodes that have a symbol
         self.nodes = list(filter(lambda x: x._id, self.nodes))
-        self.hash = self.nodes[-1]._id
+        self.augmented_state = self.nodes[-1]._id
 
-        # print('\nFOLLOWPOS FINAL:')
-        # print(self.nodes)
-
-        # print('\nGENERACIÓN DE ESTADOS')
         # Recursion
         self.CalcNewStates(initial_state, next(self.STATES))
 
@@ -66,10 +60,10 @@ class DDFA:
 
         if not self.states:
             self.states.append(set(state))
-            if self.hash in state:
-                self.final_states.update(curr_state)
+            if self.augmented_state in state:
+                self.accepting_states.update(curr_state)
 
-        # print('\tEN EL ESTADO', state)
+        # Iteramos por cada símbolo
         for symbol in self.symbols:
 
             # Get all the nodes with the same symbol in followpos
@@ -84,47 +78,50 @@ class DDFA:
             # new state is not in the state list
             if new_state not in self.states and new_state:
 
+                # Get this new state's letter
                 self.states.append(new_state)
                 next_state = next(self.STATES)
 
+                # Add state to transition function
                 try:
-                    self.table[next_state]
+                    self.trans_func[next_state]
                 except:
-                    self.table[next_state] = dict()
+                    self.trans_func[next_state] = dict()
 
                 try:
-                    existing_states = self.table[curr_state]
+                    existing_states = self.trans_func[curr_state]
                 except:
-                    self.table[curr_state] = dict()
-                    existing_states = self.table[curr_state]
+                    self.trans_func[curr_state] = dict()
+                    existing_states = self.trans_func[curr_state]
 
+                # Add the reference
                 existing_states[symbol] = next_state
-                self.table[curr_state] = existing_states
+                self.trans_func[curr_state] = existing_states
 
-                if self.hash in new_state:
-                    self.final_states.update(next_state)
+                # Is it an acceptina_state?
+                if self.augmented_state in new_state:
+                    self.accepting_states.update(next_state)
 
-                # print(
-                #     f'\t{new_state} es un estado nuevo, se iterará por cada símbolo\n')
+                # Repeat with this new state
                 self.CalcNewStates(new_state, next_state)
 
             elif new_state:
+                # State already exists... which one is it?
                 for i in range(0, len(self.states)):
 
                     if self.states[i] == new_state:
                         state_ref = RAW_STATES[i]
                         break
 
+                # Add the symbol transition
                 try:
-                    existing_states = self.table[curr_state]
+                    existing_states = self.trans_func[curr_state]
                 except:
-                    self.table[curr_state] = {}
-                    existing_states = self.table[curr_state]
+                    self.trans_func[curr_state] = {}
+                    existing_states = self.trans_func[curr_state]
 
-                # print(
-                #     f'\t{new_state} ya existe, se agrega la transición {curr_state} -> {symbol} -> {state_ref}\n')
                 existing_states[symbol] = state_ref
-                self.table[curr_state] = existing_states
+                self.trans_func[curr_state] = existing_states
 
     def ParseTree(self, node):
         method_name = node.__class__.__name__ + 'Node'
@@ -223,22 +220,21 @@ class DDFA:
                 return 'No'
 
             try:
-                curr_state = self.table[curr_state][symbol]
+                curr_state = self.trans_func[curr_state][symbol]
             except:
-                if curr_state in self.final_states and symbol in self.table['A']:
-                    curr_state = self.table['A'][symbol]
+                if curr_state in self.accepting_states and symbol in self.trans_func['A']:
+                    curr_state = self.trans_func['A'][symbol]
                 else:
                     return 'No'
 
-        return 'Yes' if curr_state in self.final_states else 'No'
+        return 'Yes' if curr_state in self.accepting_states else 'No'
 
     def GraphDFA(self):
-        states = set(self.table.keys())
+        states = set(self.trans_func.keys())
         alphabet = set(self.symbols)
-        initial_state = 'A'
 
-        dfa = SimpleDFA(states, alphabet, initial_state,
-                        self.final_states, self.table)
+        dfa = SimpleDFA(states, alphabet, self.initial_state,
+                        self.accepting_states, self.trans_func)
 
         graph = dfa.trim().to_graphviz()
         graph.attr(rankdir='LR')

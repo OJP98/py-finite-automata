@@ -6,21 +6,27 @@ from utils import WriteToFile
 
 
 class NFA:
-    def __init__(self, init_node, symbols, regex):
-        self.dot = Digraph(comment='Diagrama NFA', strict=True)
-        self.dot.attr(rankdir='LR')
-        self.dot.attr('node', shape='circle')
-        self.init_node = init_node
-        self.final_states = []
+    def __init__(self, tree, symbols, regex):
+        # Propiedades de un autómata finito
+        self.accepting_states = []
         self.symbols = symbols
         self.trans_func = None
         self.curr_state = 1
 
-        self.Render(init_node)
-        self.trans_func = self.GetTransitionTable()
-        self.final_states = self.GetFinalStates()
-        self.regexAccepted = None
+        # Árbol de nodos y expresión regular
         self.regex = regex
+        self.tree = tree
+        self.regexAccepted = None
+
+        # Se ejecuta el algoritmo
+        self.Render(tree)
+        self.trans_func = self.GenerateTransitionTable()
+        self.accepting_states = self.GetAcceptingState()
+
+        # Propiedades para crear el diagrama
+        self.dot = Digraph(comment='Diagrama NFA', strict=True)
+        self.dot.attr(rankdir='LR')
+        self.dot.attr('node', shape='circle')
 
     def Render(self, node):
         self.prev_state = self.curr_state
@@ -30,6 +36,21 @@ class NFA:
 
     def LetterNode(self, node):
         return node.value
+
+    def AppendNode(self, node):
+
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            self.Render(node.a)
+        )
+
+        self.curr_state += 1
+        self.dot.edge(
+            str(self.curr_state - 1),
+            str(self.curr_state),
+            self.Render(node.b)
+        )
 
     def OrNode(self, node):
         initial_node = self.curr_state - 1
@@ -83,21 +104,6 @@ class NFA:
             str(self.curr_state - 1),
             str(self.curr_state),
             'e'
-        )
-
-    def AppendNode(self, node):
-
-        self.dot.edge(
-            str(self.curr_state - 1),
-            str(self.curr_state),
-            self.Render(node.a)
-        )
-
-        self.curr_state += 1
-        self.dot.edge(
-            str(self.curr_state - 1),
-            str(self.curr_state),
-            self.Render(node.b)
         )
 
     def KleeneNode(self, node):
@@ -206,7 +212,7 @@ class NFA:
             'e'
         )
 
-    def GetTransitionTable(self):
+    def GenerateTransitionTable(self):
 
         states = [i.replace('\t', '')
                   for i in self.dot.source.split('\n') if '->' in i and '=' in i]
@@ -243,30 +249,23 @@ class NFA:
 
     def EvalNext(self, eval_symbol, curr_state, eval_regex):
 
-        # print('\nVAMOS A EVALUAR', eval_symbol, 'DESDE', curr_state)
-
         if self.regexAccepted != None:
             return
 
         transitions = self.trans_func[curr_state]
         for trans_symbol in transitions:
-            # print('TRANSICIONES SON', transitions)
 
             if trans_symbol == 'e':
-
-                if not eval_regex and str(self.final_states) in transitions['e']:
+                if not eval_regex and str(self.accepting_states) in transitions['e']:
                     self.regexAccepted = True
                     return
 
                 for state in transitions['e']:
-
                     if self.regexAccepted != None:
                         break
-
                     self.EvalNext(eval_symbol, state, eval_regex)
 
             elif trans_symbol == eval_symbol:
-
                 next_regex = eval_regex[1:]
                 try:
                     next_symbol = next_regex[0]
@@ -274,11 +273,11 @@ class NFA:
                     next_symbol = None
 
                 if not next_symbol:
-                    if str(self.final_states) in transitions[trans_symbol]:
+                    if str(self.accepting_states) in transitions[trans_symbol]:
                         self.regexAccepted = True
                         return
 
-                    elif str(self.final_states) != curr_state:
+                    elif str(self.accepting_states) != curr_state:
                         for state in transitions[trans_symbol]:
                             self.EvalNext('e', state, None)
                         if self.regexAccepted != None:
@@ -288,33 +287,26 @@ class NFA:
                     return
 
                 for state in transitions[trans_symbol]:
-
-                    if not next_symbol and str(state) == self.final_states:
+                    if not next_symbol and str(state) == self.accepting_states:
                         self.regexAccepted = True
                         return
 
                     self.EvalNext(next_symbol, state, next_regex)
 
-            # else:
-                # print('NO EXISTE EN ESTA TRANSICION')
+    def GetAcceptingState(self):
+        self.dot.node(str(self.curr_state), shape='doublecircle')
+        self.accepting_states.append(self.curr_state)
+        return self.curr_state
 
     def WriteNFADiagram(self):
         source = self.dot.source
-
         debug_string = f'''
 NFA:
 - Símbolos: {self.symbols}
-- Estado final: {self.final_states}
+- Estado final: {self.accepting_states}
 - Tabla de transición:
         '''
-
         # print(debug_string)
         # pprint(self.trans_func)
-
         WriteToFile('./output/NFA.gv', source)
         self.dot.render('./output/NFA.gv', view=True)
-
-    def GetFinalStates(self):
-        self.dot.node(str(self.curr_state), shape='doublecircle')
-        self.final_states.append(self.curr_state)
-        return self.curr_state

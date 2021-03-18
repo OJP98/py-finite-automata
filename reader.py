@@ -54,15 +54,10 @@ class Reader:
                     if self.curr_char != None and self.curr_char == '(' and added_parenthesis:
                         yield Token(TokenType.APPEND)
 
-                    # if self.curr_char != None and self.curr_char != ')':
-                    #     yield Token(TokenType.RPAR, ')')
-
                 if self.curr_char != None and self.curr_char == '(' and not added_parenthesis:
                     yield Token(TokenType.RPAR, ')')
                     yield Token(TokenType.APPEND)
 
-                # elif self.curr_char != None and self.curr_char != ')':
-                #     yield Token(TokenType.RPAR, ')')
                 elif not added_parenthesis:
                     yield Token(TokenType.RPAR, ')')
 
@@ -99,16 +94,6 @@ class Reader:
 
             else:
                 raise Exception(f'Invalid entry: {self.curr_char}')
-
-    def CreateLetter(self):
-        exp = self.curr_char
-        self.Next()
-
-        while self.curr_char != None and self.curr_char in LETTERS:
-            exp += self.curr_char
-            self.Next()
-
-        return exp
 
     def GetSymbols(self):
         return self.input
