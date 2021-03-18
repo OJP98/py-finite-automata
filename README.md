@@ -1,2 +1,2 @@
-# py-nfa-regex
-Python construction of NFA's with different algorithms with testing of regex.
+# py-finite-automata
+Python construction of Finite Automatas with different algorithms. Also simulates and tests regular expressions.
