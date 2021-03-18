@@ -98,7 +98,7 @@ if __name__ == "__main__":
                     print('>', nfa_regex)
 
                     dfa = DFA(nfa.trans_func, nfa.symbols,
-                              nfa.curr_state, nfa.final_states, regex_input)
+                              nfa.curr_state, nfa.accepting_states, regex_input)
                     dfa.TransformNFAToDFA()
                     start_time = process_time()
                     dfa_regex = dfa.EvalRegex()

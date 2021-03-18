@@ -18,15 +18,15 @@ class NFA:
         self.tree = tree
         self.regexAccepted = None
 
-        # Se ejecuta el algoritmo
-        self.Render(tree)
-        self.trans_func = self.GenerateTransitionTable()
-        self.accepting_states = self.GetAcceptingState()
-
         # Propiedades para crear el diagrama
         self.dot = Digraph(comment='Diagrama NFA', strict=True)
         self.dot.attr(rankdir='LR')
         self.dot.attr('node', shape='circle')
+
+        # Se ejecuta el algoritmo
+        self.Render(tree)
+        self.trans_func = self.GenerateTransitionTable()
+        self.accepting_states = self.GetAcceptingState()
 
     def Render(self, node):
         self.prev_state = self.curr_state

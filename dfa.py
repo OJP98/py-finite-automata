@@ -20,14 +20,14 @@ class DFA:
         self.accepting_states = list()
         self.initial_state = 'A'
 
-        self.nodes = []
-        self.iterations = 0
-        self.regex = regex
-
         try:
             self.symbols.remove('e')
         except:
             pass
+
+        self.nodes = []
+        self.iterations = 0
+        self.regex = regex
 
     def MoveTo(self, node_id, eval_symbol='e', array=[], add_initial=False, move_once=False):
 
